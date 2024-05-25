@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Your Page...</title>
+    <script>
+        async function fetchAIResponse(prompt) {
+            const apiUrl = 'https://api.discord.rocks/ask';
+            const payload = {
+                messages: [
+                    { role: 'system', content: 'Generate a complete HTML page based on the prompt. Please reply with only the html, no other comments or markdown tags.' },
+                    { role: 'user', content: prompt }
+                ],
+                model: 'gpt-4o',
+                max_tokens: 2048
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                return data.response;
+            } catch (error) {
+                console.error('Error fetching AI response:', error);
+                return '<p>Error fetching AI response.</p>';
+            }
+        }
+
+        function getPromptFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return decodeURIComponent(urlParams.get('prompt') || 'A page angrily telling the user to enter a prompt? Do not include a prompt box');
+        }
+
+        async function loadAIContent() {
+            const prompt = getPromptFromUrl();
+            const aiContent = await fetchAIResponse(prompt);
+            document.open();
+            document.write(aiContent);
+            document.close();
+        }
+
+        window.onload = loadAIContent;
+    </script>
+</head>
+<body>
+    <h1 style="font-family: 'Arial', sans-serif;"">Loading content...</h1>
+    <p style="font-family: 'Arial', sans-serif;">An AI is currently working hard making your website ✨</p>
+</body>
+</html>
